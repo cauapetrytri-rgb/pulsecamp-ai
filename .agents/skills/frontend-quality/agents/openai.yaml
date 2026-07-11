@@ -1,0 +1,4 @@
+interface:
+  display_name: "Frontend Quality"
+  short_description: "Valida qualidade, testes e arquitetura frontend"
+  default_prompt: "Use $frontend-quality para revisar e fortalecer a implementação frontend deste projeto."

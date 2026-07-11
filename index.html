@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PulseCamp AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">P</div>
+          <div>
+            <strong>PulseCamp AI</strong>
+            <span>Gestao de campanhas</span>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="Navegacao principal">
+          <button class="nav-item active" data-view="dashboard" type="button"><span>⌂</span>Visao geral</button>
+          <button class="nav-item" data-view="planner" type="button"><span>▦</span>Planner</button>
+          <button class="nav-item" data-view="insights" type="button"><span>◈</span>IA estrategista</button>
+          <button class="nav-item" data-view="approvals" type="button"><span>✓</span>Aprovacoes</button>
+          <button class="nav-item" data-view="settings" type="button"><span>⚙</span>Canais</button>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="eyebrow">Proxima acao</span>
+          <strong>Aprovar campanha de reativacao</strong>
+          <p>Estimativa de R$ 18.700 em receita influenciada nos proximos 10 dias.</p>
+          <button class="ghost-button" type="button" data-action="open-ai">Ver analise</button>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">Centro de crescimento</span>
+            <h1>Campanhas, performance e decisoes em um lugar.</h1>
+          </div>
+          <div class="top-actions">
+            <button class="icon-button" type="button" aria-label="Buscar">⌕</button>
+            <button class="secondary-button" type="button" data-action="open-ai">Resumo IA</button>
+            <button class="primary-button" type="button" data-action="create-campaign">Nova campanha</button>
+          </div>
+        </header>
+
+        <section class="view active-view" id="dashboard">
+          <div class="kpi-grid">
+            <article class="kpi">
+              <span>Receita influenciada</span>
+              <strong>R$ 284.900</strong>
+              <small class="positive">+18,4% vs. mes anterior</small>
+            </article>
+            <article class="kpi">
+              <span>ROAS medio</span>
+              <strong>4,8x</strong>
+              <small class="positive">Meta: 3,5x</small>
+            </article>
+            <article class="kpi">
+              <span>Campanhas ativas</span>
+              <strong>12</strong>
+              <small>4 precisam de ajuste</small>
+            </article>
+            <article class="kpi alert">
+              <span>Verba em risco</span>
+              <strong>R$ 9.420</strong>
+              <small>IA detectou saturacao</small>
+            </article>
+          </div>
+
+          <div class="main-grid">
+            <section class="panel performance-panel">
+              <div class="panel-head">
+                <div>
+                  <span class="eyebrow">Performance</span>
+                  <h2>Campanhas por canal</h2>
+                </div>
+                <select id="periodSelect" aria-label="Periodo">
+                  <option>Ultimos 30 dias</option>
+                  <option>Ultimos 7 dias</option>
+                  <option>Este trimestre</option>
+                </select>
+              </div>
+              <div class="chart" aria-label="Grafico de performance">
+                <div style="--height: 78%"><span>Meta</span></div>
+                <div style="--height: 54%"><span>Google</span></div>
+                <div style="--height: 66%"><span>Email</span></div>
+                <div style="--height: 42%"><span>WhatsApp</span></div>
+                <div style="--height: 84%"><span>CRM</span></div>
+              </div>
+              <div class="channel-row">
+                <span class="dot meta"></span> Meta Ads
+                <span class="dot google"></span> Google
+                <span class="dot email"></span> Email
+                <span class="dot whats"></span> WhatsApp
+              </div>
+            </section>
+
+            <section class="panel ai-panel">
+              <div class="panel-head">
+                <div>
+                  <span class="eyebrow">IA estrategista</span>
+                  <h2>Diagnostico de hoje</h2>
+                </div>
+                <span class="status-pill">Ao vivo</span>
+              </div>
+              <div class="ai-feed" id="aiFeed">
+                <article>
+                  <strong>Realocar verba</strong>
+                  <p>Campanha "Lead Solar Premium" mostra fadiga criativa. Reduza 18% no conjunto frio e mova para remarketing.</p>
+                </article>
+                <article>
+                  <strong>Publicar agora</strong>
+                  <p>Seu publico de decisores teve pico de resposta entre 18h e 20h nas ultimas 3 quartas-feiras.</p>
+                </article>
+                <article>
+                  <strong>Recuperar oportunidades</strong>
+                  <p>147 leads abriram proposta e nao responderam. A IA criou 3 mensagens por nivel de intencao.</p>
+                </article>
+              </div>
+            </section>
+          </div>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Fila de campanhas</span>
+                <h2>O que esta acontecendo agora</h2>
+              </div>
+              <button class="secondary-button" type="button" data-action="create-campaign">Planejar campanha</button>
+            </div>
+            <div class="campaign-table" id="campaignTable"></div>
+          </section>
+        </section>
+
+        <section class="view" id="planner">
+          <div class="planner-layout">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <span class="eyebrow">Criador de campanha</span>
+                  <h2>Briefing guiado pela IA</h2>
+                </div>
+              </div>
+              <form class="campaign-form" id="campaignForm">
+                <label>
+                  Objetivo
+                  <select name="goal">
+                    <option>Gerar leads qualificados</option>
+                    <option>Reativar clientes</option>
+                    <option>Vender oferta relampago</option>
+                    <option>Lancar novo produto</option>
+                  </select>
+                </label>
+                <label>
+                  Publico
+                  <input name="audience" value="Gestores de pequenas empresas com verba mensal acima de R$ 5 mil" />
+                </label>
+                <label>
+                  Oferta
+                  <input name="offer" value="Diagnostico gratuito de campanhas por IA" />
+                </label>
+                <label>
+                  Canais
+                  <div class="checkbox-row">
+                    <span><input type="checkbox" checked /> Meta</span>
+                    <span><input type="checkbox" checked /> Google</span>
+                    <span><input type="checkbox" checked /> Email</span>
+                    <span><input type="checkbox" /> WhatsApp</span>
+                  </div>
+                </label>
+                <button class="primary-button full" type="submit">Gerar campanha</button>
+              </form>
+            </section>
+
+            <section class="panel output-panel">
+              <div class="panel-head">
+                <div>
+                  <span class="eyebrow">Entrega da IA</span>
+                  <h2>Plano gerado</h2>
+                </div>
+                <span class="status-pill muted">Pronto para editar</span>
+              </div>
+              <div id="campaignOutput" class="generated-box">
+                <p>Preencha o briefing e gere uma campanha multicanal com criativos, segmentacao, verba e calendario.</p>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="insights">
+          <div class="insight-grid">
+            <article class="panel score-panel">
+              <span class="eyebrow">Saude de crescimento</span>
+              <strong>82</strong>
+              <p>Boa tracao, mas ha desperdicio em topo de funil e baixa cadencia de follow-up.</p>
+            </article>
+            <article class="panel">
+              <span class="eyebrow">Recomendacao</span>
+              <h2>Corte 12% de verba fria por 5 dias</h2>
+              <p>O custo por lead subiu 31% apos frequencia media passar de 4,2. A IA recomenda testar nova promessa antes de escalar.</p>
+              <button class="primary-button" type="button" data-action="apply-recommendation">Aplicar recomendacao</button>
+            </article>
+            <article class="panel">
+              <span class="eyebrow">Experimento</span>
+              <h2>Teste A/B sugerido</h2>
+              <p>Comparar "economize tempo" contra "recupere vendas perdidas". Previsao de lift: 14% a 22%.</p>
+              <button class="secondary-button" type="button" data-action="create-campaign">Criar teste</button>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="approvals">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Aprovacoes</span>
+                <h2>Conteudos aguardando decisao</h2>
+              </div>
+            </div>
+            <div class="approval-list" id="approvalList"></div>
+          </div>
+        </section>
+
+        <section class="view" id="settings">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Canais</span>
+                <h2>Conectores preparados para o SaaS</h2>
+              </div>
+            </div>
+            <div class="connector-grid">
+              <article><strong>Meta Ads</strong><span>Conectado</span><button type="button">Revisar</button></article>
+              <article><strong>Google Ads</strong><span>Conectado</span><button type="button">Revisar</button></article>
+              <article><strong>Email</strong><span>Pendente</span><button type="button">Conectar</button></article>
+              <article><strong>WhatsApp</strong><span>Pendente</span><button type="button">Conectar</button></article>
+              <article><strong>CRM</strong><span>CSV ativo</span><button type="button">Importar</button></article>
+              <article><strong>Analytics</strong><span>Conectado</span><button type="button">Revisar</button></article>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal" id="modal" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <button class="close-button" type="button" data-action="close-modal" aria-label="Fechar">×</button>
+        <span class="eyebrow">PulseCamp AI</span>
+        <h2 id="modalTitle">Resumo executivo</h2>
+        <p id="modalBody">A IA identificou 3 campanhas com potencial de ganho rapido: uma por verba mal distribuida, uma por criativo saturado e uma por follow-up atrasado.</p>
+        <div class="modal-actions">
+          <button class="secondary-button" type="button" data-action="close-modal">Depois</button>
+          <button class="primary-button" type="button" data-action="apply-recommendation">Transformar em plano</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

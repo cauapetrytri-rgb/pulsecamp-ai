@@ -1,0 +1,4 @@
+interface:
+  display_name: "SaaS Product Design"
+  short_description: "Revisa produto SaaS B2B e sua hierarquia"
+  default_prompt: "Use $saas-product-design para revisar a clareza e a arquitetura deste produto SaaS."

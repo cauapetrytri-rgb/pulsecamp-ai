@@ -1,0 +1,4 @@
+interface:
+  display_name: "SaaS Accessibility"
+  short_description: "Audita acessibilidade em interfaces SaaS"
+  default_prompt: "Use $saas-accessibility para revisar teclado, semântica e contraste desta interface."

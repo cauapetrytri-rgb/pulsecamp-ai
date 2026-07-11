@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Review"
+  short_description: "Revisa visualmente telas e responsividade"
+  default_prompt: "Use $design-review para capturar, analisar e corrigir as principais telas do produto."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dashboard UX"
+  short_description: "Melhora métricas, gráficos e tabelas SaaS"
+  default_prompt: "Use $dashboard-ux para auditar e melhorar este dashboard SaaS B2B."
