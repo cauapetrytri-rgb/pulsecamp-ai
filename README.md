@@ -116,6 +116,10 @@ O fluxo E2E cobre login inválido e válido, criação de empresa, simulação d
 
 Demo técnica funcional, com fronteiras de autenticação e autorização implementadas. Consulte [SECURITY.md](SECURITY.md) antes de adaptar o projeto para uma operação real.
 
+## Licença
+
+Código publicado para avaliação de portfólio. Nenhuma licença de reutilização comercial é concedida neste momento.
+
 ---
 
 Desenvolvido por [Cauã Petry](https://github.com/cauapetrytri-rgb).
