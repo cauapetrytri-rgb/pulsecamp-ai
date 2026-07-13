@@ -11,7 +11,10 @@ import { CampaignsPage, CreativesPage, IntegrationsPage, LinksPage, OriginsPage 
 import { SitesPage } from "@/components/pages/sites-page";
 import { Icon } from "@/components/ui/icon";
 import { dashboardHref, navigationSections, type AppView, viewMeta } from "@/lib/navigation";
+import type { SessionUser } from "@/lib/auth";
 import type { DashboardData } from "@/lib/types";
+
+const ADMIN_VIEWS = new Set<AppView>(["companies", "users", "settings", "billing", "integrations"]);
 
 function filteredDashboardData(data: DashboardData, clientId: string): DashboardData {
   if (clientId === "all") return data;
@@ -39,9 +42,10 @@ type DashboardProps = {
   data: DashboardData;
   initialView: AppView;
   initialClient: string;
+  user: SessionUser;
 };
 
-export function Dashboard({ data, initialView = "dashboard", initialClient = "all" }: DashboardProps) {
+export function Dashboard({ data, initialView = "dashboard", initialClient = "all", user }: DashboardProps) {
   const router = useRouter();
   const [view, setView] = useState<AppView>(initialView);
   const [selectedClient, setSelectedClient] = useState(initialClient);
@@ -92,6 +96,11 @@ export function Dashboard({ data, initialView = "dashboard", initialClient = "al
     } finally {
       setActiveAction(null);
     }
+  }
+
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.assign("/login");
   }
 
   const common = {
@@ -148,7 +157,10 @@ export function Dashboard({ data, initialView = "dashboard", initialClient = "al
         </div>
 
         <nav className="product-nav" aria-label="Navegação principal">
-          {navigationSections.map((section) => <div className="nav-group" key={section.label}><span>{section.label}</span>{section.items.map((item) => <button key={item.id} type="button" className={view === item.id ? "active" : ""} aria-label={item.label} aria-current={view === item.id ? "page" : undefined} onClick={() => openView(item.id)}><Icon name={item.icon} /><strong>{item.label}</strong>{item.id === "conversations" && currentData.leads.length ? <em>{currentData.leads.length}</em> : item.badge ? <em>{item.badge}</em> : null}</button>)}</div>)}
+          {navigationSections.map((section) => {
+            const items = section.items.filter((item) => user.role === "admin" || !ADMIN_VIEWS.has(item.id));
+            return items.length ? <div className="nav-group" key={section.label}><span>{section.label}</span>{items.map((item) => <button key={item.id} type="button" className={view === item.id ? "active" : ""} aria-label={item.label} aria-current={view === item.id ? "page" : undefined} onClick={() => openView(item.id)}><Icon name={item.icon} /><strong>{item.label}</strong>{item.id === "conversations" && currentData.leads.length ? <em>{currentData.leads.length}</em> : item.badge ? <em>{item.badge}</em> : null}</button>)}</div> : null;
+          })}
         </nav>
 
         <div className="plan-card">
@@ -156,14 +168,14 @@ export function Dashboard({ data, initialView = "dashboard", initialClient = "al
           <div><i style={{ width: "38%" }} /></div>
           <span>Uso: 38% da capacidade</span>
         </div>
-        <footer className="sidebar-user"><span>CP</span><div><strong>Cauã Petry</strong><small>Administrador</small></div><button type="button" aria-label="Opções do perfil" onClick={() => notify("Opções do perfil abertas.")}>•••</button></footer>
+        <footer className="sidebar-user"><span>{user.name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase()}</span><div><strong>{user.name}</strong><small>{user.role === "admin" ? "Administrador" : "Analista"}</small></div><button type="button" aria-label="Sair" onClick={logout}>Sair</button></footer>
       </aside>
 
       <div className="product-main">
         <header className="product-header">
           <button className="mobile-menu-button" type="button" aria-label="Abrir menu" onClick={() => setMobileOpen(true)}><span /><span /><span /></button>
           <div className="page-heading">
-            <h1>{view === "dashboard" ? "Boa tarde, Cauã!" : meta.title}</h1>
+            <h1>{view === "dashboard" ? `Boa tarde, ${user.name.split(" ")[0]}!` : meta.title}</h1>
             <p>{view === "dashboard" ? "Aqui está o resumo do desempenho do seu marketing hoje." : meta.description}</p>
           </div>
           <div className="header-actions">

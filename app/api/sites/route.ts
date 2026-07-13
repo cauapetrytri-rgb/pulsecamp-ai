@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getDb } from "@/lib/db";
+import { apiError, requireClientAccess, requireSameOrigin, requireUser } from "@/lib/http";
 import { normalizeGtmContainerId, normalizePublicUrl } from "@/lib/tracking";
 import type { ClientRecord, TrackingSiteRecord } from "@/lib/types";
 
@@ -18,7 +19,10 @@ const SiteSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    requireSameOrigin(request);
+    const user = requireUser(request);
     const input = SiteSchema.parse(await request.json());
+    requireClientAccess(user, input.clientId);
     const db = getDb();
     const client = db.prepare("SELECT * FROM clients WHERE id = ?").get(input.clientId) as unknown as ClientRecord | undefined;
     if (!client) return NextResponse.json({ error: "Empresa não encontrada." }, { status: 404 });
@@ -36,8 +40,6 @@ export async function POST(request: Request) {
     const site = db.prepare("SELECT * FROM tracking_sites WHERE id = ?").get(id) as unknown as TrackingSiteRecord;
     return NextResponse.json({ ok: true, site }, { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Não foi possível cadastrar o site.";
-    const status = message.includes("UNIQUE constraint") ? 409 : 400;
-    return NextResponse.json({ error: status === 409 ? "Este site já está cadastrado para a empresa." : message }, { status });
+    return apiError(error, "Não foi possível cadastrar o site.");
   }
 }

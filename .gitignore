@@ -11,3 +11,6 @@ coverage
 .vercel
 npm-debug.log*
 .DS_Store
+.env*
+test-results
+playwright-report

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { saveMetaConnection } from "@/lib/meta-connections";
+import { apiError, requireClientAccess, requireSameOrigin, requireUser } from "@/lib/http";
 
 export const runtime = "nodejs";
 
@@ -14,9 +15,13 @@ const BodySchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const result = saveMetaConnection(BodySchema.parse(await request.json()));
+    requireSameOrigin(request);
+    const user = requireUser(request, "admin");
+    const input = BodySchema.parse(await request.json());
+    requireClientAccess(user, input.clientId);
+    const result = saveMetaConnection(input);
     return NextResponse.json({ ok: true, result });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Não foi possível salvar a conexão Meta." }, { status: 400 });
+    return apiError(error, "Não foi possível salvar a conexão Meta.");
   }
 }

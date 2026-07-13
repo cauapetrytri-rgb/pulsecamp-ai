@@ -373,7 +373,7 @@ export function getDb() {
   return db;
 }
 
-export function getDashboardData(): DashboardData {
+export function getDashboardData(allowedClientIds?: string[]): DashboardData {
   const db = getDb();
   const plainRows = <T,>(rows: unknown[]) => rows.map((row) => ({ ...(row as Record<string, unknown>) })) as T[];
   const clients = plainRows<ClientRecord>(db.prepare("SELECT * FROM clients ORDER BY name").all());
@@ -434,7 +434,18 @@ export function getDashboardData(): DashboardData {
     ORDER BY l.created_at DESC
   `).all());
 
-  const totals = campaigns.reduce(
+  const allowed = allowedClientIds ? new Set(allowedClientIds) : null;
+  const visibleClients = allowed ? clients.filter((item) => allowed.has(item.id)) : clients;
+  const visibleMetaConnections = allowed ? metaConnections.filter((item) => allowed.has(item.client_id)) : metaConnections;
+  const visibleJourneyStages = allowed ? journeyStages.filter((item) => allowed.has(item.client_id)) : journeyStages;
+  const visibleCampaigns = allowed ? campaigns.filter((item) => allowed.has(item.client_id)) : campaigns;
+  const visibleLeads = allowed ? leads.filter((item) => allowed.has(item.client_id)) : leads;
+  const visibleEvents = allowed ? events.filter((item) => allowed.has(item.client_id)) : events;
+  const visibleSales = allowed ? sales.filter((item) => allowed.has(item.client_id)) : sales;
+  const visibleSites = allowed ? sites.filter((item) => allowed.has(item.client_id)) : sites;
+  const visibleTrackedLinks = allowed ? trackedLinks.filter((item) => allowed.has(item.client_id)) : trackedLinks;
+
+  const totals = visibleCampaigns.reduce(
     (acc, campaign) => ({
       spend: acc.spend + campaign.spend,
       conversations: acc.conversations + campaign.conversations,
@@ -445,18 +456,18 @@ export function getDashboardData(): DashboardData {
     }),
     { spend: 0, conversations: 0, qualified: 0, sales: 0, revenue: 0, pendingEvents: 0 },
   );
-  totals.pendingEvents = events.filter((event) => event.status === "pending" || event.status === "failed").length;
+  totals.pendingEvents = visibleEvents.filter((event) => event.status === "pending" || event.status === "failed").length;
 
   return {
-    clients,
-    metaConnections,
-    journeyStages,
-    campaigns,
-    leads,
-    events,
-    sales,
-    sites,
-    trackedLinks,
+    clients: visibleClients,
+    metaConnections: visibleMetaConnections,
+    journeyStages: visibleJourneyStages,
+    campaigns: visibleCampaigns,
+    leads: visibleLeads,
+    events: visibleEvents,
+    sales: visibleSales,
+    sites: visibleSites,
+    trackedLinks: visibleTrackedLinks,
     totals,
     runtime: {
       capiDryRun: process.env.META_CAPI_DRY_RUN !== "false",

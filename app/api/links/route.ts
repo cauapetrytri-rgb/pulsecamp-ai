@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getDb } from "@/lib/db";
+import { apiError, requireClientAccess, requireSameOrigin, requireUser } from "@/lib/http";
 import { buildTrackedDestination, slugify } from "@/lib/tracking";
 import type { ClientRecord, TrackedLinkRecord } from "@/lib/types";
 
@@ -22,7 +23,10 @@ const LinkSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    requireSameOrigin(request);
+    const user = requireUser(request);
     const input = LinkSchema.parse(await request.json());
+    requireClientAccess(user, input.clientId);
     const db = getDb();
     const client = db.prepare("SELECT * FROM clients WHERE id = ?").get(input.clientId) as unknown as ClientRecord | undefined;
     if (!client) return NextResponse.json({ error: "Empresa não encontrada." }, { status: 404 });
@@ -41,7 +45,6 @@ export async function POST(request: Request) {
     const link = db.prepare("SELECT *, 0 AS click_count FROM tracked_links WHERE id = ?").get(id) as unknown as TrackedLinkRecord;
     return NextResponse.json({ ok: true, link }, { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Não foi possível criar o link.";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return apiError(error, "Não foi possível criar o link.");
   }
 }

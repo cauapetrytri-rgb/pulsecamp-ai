@@ -1,24 +1,37 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { authenticateCredentials, createSessionToken, SESSION_COOKIE } from "../lib/auth";
+
 process.env.DATABASE_PATH = ":memory:";
+process.env.SESSION_SECRET = "test-session-secret-with-at-least-32-characters";
+
+function apiRequest(url: string, body: unknown) {
+  const user = authenticateCredentials("admin@pulsecamp.demo", "PulseCamp2026!");
+  assert.ok(user);
+  return new Request(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Origin: "http://localhost",
+      Cookie: `${SESSION_COOKIE}=${createSessionToken(user)}`,
+    },
+    body: JSON.stringify(body),
+  });
+}
 
 test("cria link persistente, registra clique e redireciona com atribuição", async () => {
   const { resetDatabaseForTests, getDb } = await import("../lib/db");
   resetDatabaseForTests();
   const { POST } = await import("../app/api/links/route");
-  const created = await POST(new Request("http://localhost/api/links", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+  const created = await POST(apiRequest("http://localhost/api/links", {
       clientId: "client-solar",
       name: "Oferta Solar",
       destination: "https://example.com/oferta",
       channel: "Meta Ads",
       campaign: "Maio",
       utmSource: "meta",
-    }),
-  }));
+    }));
   assert.equal(created.status, 201);
   const payload = await created.json() as { link: { id: string; slug: string } };
 
@@ -42,11 +55,7 @@ test("cadastra site com URL e ID GTM normalizados", async () => {
   const { resetDatabaseForTests } = await import("../lib/db");
   resetDatabaseForTests();
   const { POST } = await import("../app/api/sites/route");
-  const response = await POST(new Request("http://localhost/api/sites", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ clientId: "client-alfa", name: "Site Alfa", url: "example.com", gtmContainerId: "gtm-alfa123" }),
-  }));
+  const response = await POST(apiRequest("http://localhost/api/sites", { clientId: "client-alfa", name: "Site Alfa", url: "example.com", gtmContainerId: "gtm-alfa123" }));
   assert.equal(response.status, 201);
   const payload = await response.json() as { site: { url: string; gtm_container_id: string; status: string } };
   assert.equal(payload.site.url, "https://example.com/");
@@ -59,10 +68,7 @@ test("associa clique do site ao lead do WhatsApp e envia fbc no evento", async (
   const { resetDatabaseForTests, getDb } = await import("../lib/db");
   resetDatabaseForTests();
   const { POST } = await import("../app/api/links/route");
-  const created = await POST(new Request("http://localhost/api/links", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ clientId: "client-solar", name: "Site para WhatsApp", destination: "https://wa.me/5511999999999?text=Quero+orçamento", channel: "Meta Ads", campaign: "Solar Julho" }),
-  }));
+  const created = await POST(apiRequest("http://localhost/api/links", { clientId: "client-solar", name: "Site para WhatsApp", destination: "https://wa.me/5511999999999?text=Quero+orçamento", channel: "Meta Ads", campaign: "Solar Julho" }));
   const link = await created.json() as { link: { slug: string } };
   const { GET } = await import("../app/go/[slug]/route");
   const redirect = await GET(new Request(`http://localhost/go/${link.link.slug}?fbclid=fb-click-123&utm_source=meta`), { params: Promise.resolve({ slug: link.link.slug }) });

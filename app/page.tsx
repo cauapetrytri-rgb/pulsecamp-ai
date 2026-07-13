@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { Dashboard } from "@/components/dashboard";
+import { allowedClientIds, getServerUser } from "@/lib/auth";
 import { getDashboardData } from "@/lib/db";
 import { isAppView, viewMeta } from "@/lib/navigation";
 
@@ -27,12 +29,14 @@ export async function generateMetadata({ searchParams }: HomePageProps): Promise
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
-  const data = getDashboardData();
+  const user = await getServerUser();
+  if (!user) redirect("/login");
+  const data = getDashboardData(allowedClientIds(user));
   const params = await searchParams;
   const requestedView = first(params.view);
   const requestedClient = first(params.client);
   const initialView = isAppView(requestedView) ? requestedView : "dashboard";
   const initialClient = data.clients.some((client) => client.id === requestedClient) ? requestedClient! : "all";
 
-  return <Dashboard data={data} initialView={initialView} initialClient={initialClient} />;
+  return <Dashboard data={data} initialView={initialView} initialClient={initialClient} user={user} />;
 }
